@@ -1,4 +1,3 @@
-use crate::util::TimeUnit;
 use core::ptr::*;
 
 pub const IMMEDIATE_MAX: u16 = 0xFFF;
@@ -44,24 +43,15 @@ pub fn switch_rd(index: u8) -> u16 {
     (sw & (0b1 << index)) >> index
 }
 
-pub fn delay(delay: u32, units: TimeUnit) {
-    let cycles = delay
-        * match units {
-            TimeUnit::Seconds => FREQ_HZ,
-            TimeUnit::Milliseconds => FREQ_KHZ,
-            TimeUnit::Microseconds => FREQ_MHZ,
-        };
-    delay_cycles(cycles);
-}
-
 pub fn delay_cycles(cycles: u32) {
+    // The borrow checker even evaluates inline assembly.
+    // We cannot modify the 'cycles' variable, we don't own it.
+    // So, we instantiate a mutable counter to subtract from.
+    let mut counter = cycles;
     unsafe {
-        // Inline assembly:
-        // Load the delay variable into a0.
-        // This works sort of like a format string.
-        asm!("mv a0, {}", in(reg) cycles);
-
-        // Call the delay routine defined in included assembly.
-        asm!("call _ASM_DELAY_CYCLES")
+        asm!("srli {}, {}, 2", in(reg) counter, out(reg) counter);
+        asm!("1:");
+        asm!("addi {}, {}, -1", in(reg) counter, out(reg) counter);
+        asm!("bnez {}, 1b", in(reg) counter);
     }
 }
