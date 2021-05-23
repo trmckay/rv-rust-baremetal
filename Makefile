@@ -1,35 +1,48 @@
 PROJECT = otter-rust
 BUILD = target/riscv32i-unknown-none-elf/release
 DEST = target/otter
+RUST_BINARY = $(BUILD)/$(PROJECT)
 
 RISCV_PREFIX = riscv32-unknown-elf-
 
 OBJCOPY = $(RISCV_PREFIX)objcopy
+OBJCOPY_FLAGS = --only-section=.data* --only-section=.text*
+STRIPPED_BINARY = $(DEST)/$(PROJECT).mem.bin
+
+HEXDUMP = hexdump
+HEXDUMP_FLAGS = -v -e '"%08x\n"'
+HEXDUMP_FILE = $(DEST)/$(PROJECT).mem.txt
+
 OBJDUMP = $(RISCV_PREFIX)objdump
+OBJDUMP_FLAGS = -S -s
+DUMP = $(DEST)/$(PROJECT).dump
 
-all: clean dirs $(DEST)/mem.txt $(DEST)/$(PROJECT).dump
+CARGO_FLAGS = --release
+RUST_FLAGS = -A dead_code
+
+all: dirs cargo $(STRIPPED_BINARY) $(DUMP) $(HEXDUMP_FILE)
 	@echo
-	@echo "Program dump at $(DEST)/$(PROJECT).dump"
-	@echo "Binary blob at $(DEST)/mem.bin"
-	@echo "Hex-dump at $(DEST)/mem.txt"
+	@echo "Program dump at $(DUMP)"
+	@echo "Binary at $(STRIPPED_BINARY)"
+	@echo "Hex-dump at $(HEXDUMP_FILE)"
+
+cargo:
+	CARGO_BUILD_RUSTFLAGS="$(RUST_FLAGS)" cargo build $(CARGO_FLAGS)
 	@echo
-	cat $(DEST)/mem.txt
 
-$(BUILD)/$(PROJECT):
-	cargo build --release
+$(STRIPPED_BINARY):
+	$(OBJCOPY) -O binary $(OBJCOPY_FLAGS) $(RUST_BINARY) $@
 
-$(DEST)/$(PROJECT).dump: $(BUILD)/$(PROJECT)
-	$(OBJDUMP) -S -s $< > $@
+$(DUMP):
+	$(OBJDUMP) $(OBJDUMP_FLAGS) $(RUST_BINARY) > $@
 
-$(DEST)/mem.bin: $(BUILD)/$(PROJECT)
-	$(OBJCOPY) -O binary --only-section=.data* --only-section=.text* $< $@
 
-$(DEST)/mem.txt: $(DEST)/mem.bin
-	hexdump -v -e '"%08x\n"' $< > $@
+$(HEXDUMP_FILE): $(STRIPPED_BINARY)
+	hexdump $(HEXDUMP_FLAGS) $< > $@
 
 dirs:
 	mkdir -p $(DEST)
 
 clean:
-	rm -rf $(TEST)
+	rm -rf $(DEST)
 	cargo clean
