@@ -8,6 +8,10 @@ OBJCOPY = $(RISCV_PREFIX)objcopy
 OBJDUMP = $(RISCV_PREFIX)objdump
 
 all: dirs $(DEST)/mem.txt $(DEST)/$(PROJECT).dump
+	@echo ""
+	@echo "Program dump at $(BUILD)/$(PROJECT).dump"
+	@echo "Binary blob at $(BUILD)/$(PROJECT).bin"
+	@echo "Hex-dump at $(BUILD)/$(PROJECT).bin"
 
 # link with gcc
 $(BUILD)/$(PROJECT):
