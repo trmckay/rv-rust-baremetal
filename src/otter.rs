@@ -24,7 +24,7 @@ pub fn leds_wr(n: u16) {
     unsafe { write_volatile(LEDS_MUT, n) }
 }
 
-pub fn sseg_rd(n: u16) {
+pub fn sseg_rd() {
     unsafe { read_volatile(SSEG as *const ()) }
 }
 
