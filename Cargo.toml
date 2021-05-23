@@ -1,0 +1,13 @@
+[package]
+name = "otter-rust"
+version = "0.1.0"
+authors = ["Trevor McKay <trmckay@calpoly.edu>"]
+edition = "2018"
+
+[dependencies]
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
