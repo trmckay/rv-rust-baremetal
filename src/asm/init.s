@@ -2,4 +2,4 @@
 .global _start
 _start:
     la   sp, __sp
-    call _rs_main
+    call _rust_entry

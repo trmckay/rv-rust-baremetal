@@ -42,16 +42,3 @@ pub fn switch_rd(index: u8) -> u16 {
     let sw = switches_rd();
     (sw & (0b1 << index)) >> index
 }
-
-pub fn delay_cycles(cycles: u32) {
-    // The borrow checker even evaluates inline assembly.
-    // We cannot modify the 'cycles' variable, we don't own it.
-    // So, we instantiate a mutable counter to subtract from.
-    let mut counter = cycles;
-    unsafe {
-        asm!("srli {}, {}, 2", in(reg) counter, out(reg) counter);
-        asm!("1:");
-        asm!("addi {}, {}, -1", in(reg) counter, out(reg) counter);
-        asm!("bnez {}, 1b", in(reg) counter);
-    }
-}

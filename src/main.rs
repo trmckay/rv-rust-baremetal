@@ -8,7 +8,7 @@
 global_asm!(include_str!("asm/init.s"));
 
 // Rust modules that we include with the project.
-mod otter;
+pub mod otter;
 mod panic;
 
 // Compute the nth Fibonacci number.
@@ -42,9 +42,9 @@ fn main() {
 // Rust will not let you do a lot of unsafe things.
 // Returning from your entry-point on baremetal is one of those
 // things. This code will not compile if it is possible to
-// return from _rs_main(). Hence, the panic (which does not return).
+// return from _rust_entry(). Hence, the panic (which does not return).
 #[no_mangle]
-pub extern "C" fn _rs_main() -> ! {
+pub extern "C" fn _rust_entry() -> ! {
     main();
     panic!();
 }

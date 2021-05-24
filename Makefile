@@ -20,13 +20,14 @@ DUMP = $(DEST)/$(PROJECT).dump
 CARGO_FLAGS = --release
 RUST_FLAGS = -A dead_code
 
-all: dirs cargo $(STRIPPED_BINARY) $(DUMP) $(HEXDUMP_FILE)
+all: cargo dirs $(STRIPPED_BINARY) $(DUMP) $(HEXDUMP_FILE)
 	@echo
 	@echo "Program dump at $(DUMP)"
 	@echo "Binary at $(STRIPPED_BINARY)"
 	@echo "Hex-dump at $(HEXDUMP_FILE)"
 
 cargo:
+	cargo clean
 	CARGO_BUILD_RUSTFLAGS="$(RUST_FLAGS)" cargo build $(CARGO_FLAGS)
 	@echo
 
